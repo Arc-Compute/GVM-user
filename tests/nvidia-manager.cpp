@@ -84,7 +84,7 @@ int main()
     };
 
     bool (*tests[])(void) = {
-        test_manager,
+        create_mdevs,
     };
 
     uint32_t failures = 0;
