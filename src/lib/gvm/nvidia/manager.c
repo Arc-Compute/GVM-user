@@ -21,6 +21,7 @@
 #include <gpu/nvidia/resman/classes.h>
 #include <gpu/nvidia/resman/types.h>
 
+#include <gvm/plugins/base.h>
 #include <gvm/nvidia/init.h>
 #include <gvm/nvidia/manager.h>
 
@@ -131,8 +132,17 @@ void handle_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
     select(n_fds, &read_fds, NULL, NULL, NULL);
 
     if (FD_ISSET(mgr->event_start, &read_fds)) {
-        printf("Got a start request from the NVIDIA kernel module\n");
-        start_vm(mgr, mdev_mgr);
+        int ret = fork();
+        if (ret == 0) {
+            ret = fork();
+
+            if (ret == 0) {
+                printf("Got a start request from the NVIDIA kernel module\n");
+                start_vm(mgr, mdev_mgr);
+            } else {
+                exit(0);
+            }
+        }
     } else if (FD_ISSET(mgr->event_bind, &read_fds)) {
         printf("Got a bind request from the NVIDIA kernel module\n");
     }
@@ -163,7 +173,7 @@ void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 
     printf(
         "MDEV UUID: %.8X-%.4X-%.4X-%.2X%.2X-%.2X%.2X%.2X%.2X%.2X%.2X\n"
-        "Got config \"%s\" for QEMU PID 0x%.8X\n"
+        "Got config \"%s\" for QEMU PID %d\n"
         "Starting VM...\n",
         uuid.time_low, uuid.time_mid, uuid.time_hi_and_version,
         uuid.clock_seq_hi_and_reserved, uuid.clock_seq_low,
@@ -183,8 +193,10 @@ void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 
     mgr->mdev_fd = nv_open_mdev(vm_start_info.mdev_id);
 
+    struct NvMdevGpu* gpu = mdev_mgr->gpus[0];
+
     for (int i = 0; i < 32 && mdev_mgr->gpus[i] != NULL; ++i) {
-        struct NvMdevGpu* gpu = mdev_mgr->gpus[i];
+        gpu = mdev_mgr->gpus[0];
 
         if (gpu->gpu->identifier != vm_start_info.pci_id)
             continue;
@@ -193,4 +205,8 @@ void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
         printf("Started VM\n");
         break;
     }
+
+    struct VmListener vm_ctrl = nv_plugin_env_setup(vm_start_info.mdev_id);
+
+    nv_plugin_start(&vm_ctrl);
 }

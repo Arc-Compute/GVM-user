@@ -37,6 +37,18 @@ struct VmMgr {
     int mdev_fd;                //!< MDEV file descriptor.
 };
 
+/*! \brief File descriptors for VM control.
+ *
+ * This is a structure which acts as a general purpose wrapper around
+ * all different components of VM control.
+ */
+struct VmListener {
+    int stop_fd;                //!< File descriptor to stop the VM.
+    int reg_fd;                 //!< File descriptor to access registers.
+    int reset_fd;               //!< File descriptor to reboot the VM.
+    int console_fd;             //!< File descriptor to access console.
+};
+
 #ifdef __cplusplus
 };
 #endif
