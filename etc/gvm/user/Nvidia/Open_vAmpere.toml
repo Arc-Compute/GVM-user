@@ -1,0 +1,71 @@
+[[config]]
+    [[config.gpu_config]]
+    vendor_id = 0x10DE
+    [[config.request]]
+    num = 529
+    name = "GVM [Class /1]"
+    v_dev_id = 0x20B01479
+    max_instances = 1
+    fb_len = 38336
+    fb_res = 2624
+    ecc_support = true
+    enc_cap = 100
+    map_video_size = 4
+    bar1_len = 0x800
+        [config.request.display]
+	num_heads = 4
+        max_res_x = 3840
+        max_res_y = 2160
+	frl_config = 120
+	frl_enable = 1
+    [[config.request]]
+    num = 530
+    name = "GVM [Class /2]"
+    v_dev_id = 0x20B01471
+    max_instances = 2
+    fb_len = 19136
+    fb_res = 1344
+    ecc_support = true
+    enc_cap = 100
+    map_video_size = 4
+    bar1_len = 0x400
+        [config.request.display]
+	num_heads = 4
+        max_res_x = 3840
+        max_res_y = 2160
+	frl_config = 120
+	frl_enable = 1
+    [[config.request]]
+    num = 531
+    name = "GVM [Class /4]"
+    v_dev_id = 0x20B01470
+    max_instances = 4
+    fb_len = 9536
+    fb_res = 704
+    ecc_support = true
+    enc_cap = 100
+    map_video_size = 4
+    bar1_len = 0x400
+        [config.request.display]
+	num_heads = 4
+        max_res_x = 3840
+        max_res_y = 2160
+	frl_config = 120
+	frl_enable = 1
+    [[config.request]]
+    num = 532
+    name = "GVM [Class /8]"
+    v_dev_id = 0x20B0146F
+    max_instances = 8
+    fb_len = 4736
+    fb_res = 384
+    ecc_support = true
+    enc_cap = 100
+    map_video_size = 4
+    bar1_len = 0x400
+        [config.request.display]
+	num_heads = 4
+        max_res_x = 3840
+        max_res_y = 2160
+	frl_config = 120
+	frl_enable = 1
