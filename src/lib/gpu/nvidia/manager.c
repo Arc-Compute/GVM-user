@@ -254,9 +254,9 @@ void create_nv_mgr_mdevs(
             mdev.p_dev_id =
                 request.p_dev_id == 0xFFFFFFFFFFFFFFFF ?
                 ggpu->device_id : request.p_dev_id;
-            mdev.fb_len = request.fb_len * 1024 * 1024;
+            mdev.fb_len = (uint64_t) request.fb_len * 1024 * 1024;
             mdev.map_video = request.map_vid_size * 1024 * 1024;
-            mdev.fb_res = request.fb_res * 1024 * 1024;
+            mdev.fb_res = (uint64_t) request.fb_res * 1024 * 1024;
             mdev.bar1_len = request.bar1_len;
 
             RM_CTRL(gpu->ctl_fd, gpu->mdev, NVA081_ADD_MDEV, mdev);
