@@ -42,7 +42,7 @@ struct NvResource {
                                 //!< of the resource's lifecycle.
     uint32_t client;            //!< All resources require a client/root.
     uint32_t parent;            //!< Parent of the resource.
-    uint64_t object;            //!< Object of the resource.
+    uint32_t object;            //!< Object of the resource.
     uint32_t rm_class;          //!< Class of the resource.
     void *class_info;           //!< Class info for the resource.
     struct NvResource* next;    //!< Next child on the level.
