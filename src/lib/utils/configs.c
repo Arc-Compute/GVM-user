@@ -174,6 +174,10 @@ struct GpuConfigs get_configs(const char* name)
             ret.configs[i].requests[j].gpu_class =
                 info.ok ? info.u.s : "Compute";
 
+            info = toml_int_in(mdev, "partition");
+            ret.configs[i].requests[j].partition =
+                info.ok ? ((unsigned) info.u.i) : 0;
+
             ret.configs[i].requests[j].disp = calloc(1, sizeof(struct VirtDisplay));
 
             info.ok = 0;

@@ -19,6 +19,8 @@
 #ifndef GVM_VM_MGR_H
 #define GVM_VM_MGR_H
 
+#include <gvm/nvidia/init.h>
+
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -35,6 +37,9 @@ struct VmMgr {
     int event_bind;             //!< Event bind fd.
     uint32_t root;              //!< Root of the VM manager.
     int mdev_fd;                //!< MDEV file descriptor.
+    union {
+        struct NvVmMgr nvidia;
+    };
 };
 
 /*! \brief File descriptors for VM control.

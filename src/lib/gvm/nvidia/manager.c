@@ -117,7 +117,7 @@ struct VmMgr init_nv_vm_mgr(struct NvMdev* mgr)
 
 /*! \todo Proper logging.
  */
-void handle_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
+void handle_nv_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 {
     int        n_fds;
     fd_set     read_fds;
@@ -138,7 +138,7 @@ void handle_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 
             if (ret == 0) {
                 printf("Got a start request from the NVIDIA kernel module\n");
-                start_vm(mgr, mdev_mgr);
+                start_nv_vm(mgr, mdev_mgr);
             } else {
                 exit(0);
             }
@@ -150,7 +150,7 @@ void handle_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 
 /*! \todo Proper logging.
  */
-void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
+void start_nv_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 {
     struct RmVmStartInfo vm_start_info = {};
 
@@ -193,6 +193,7 @@ void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
 
     mgr->mdev_fd = nv_open_mdev(vm_start_info.mdev_id);
 
+    struct VmListener vm_ctrl = nv_plugin_env_setup(vm_start_info.mdev_id);
     struct NvMdevGpu* gpu = mdev_mgr->gpus[0];
 
     for (int i = 0; i < 32 && mdev_mgr->gpus[i] != NULL; ++i) {
@@ -201,12 +202,25 @@ void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
         if (gpu->gpu->identifier != vm_start_info.pci_id)
             continue;
 
-        RM_CTRL(mgr->mdev_fd, gpu->mdev, 0xA0810107, notify_start);
+        RM_CTRL(gpu->dev_fd, gpu->mdev, NVA081_NOTIFY_START, notify_start);
         printf("Started VM\n");
         break;
     }
 
-    struct VmListener vm_ctrl = nv_plugin_env_setup(vm_start_info.mdev_id);
+    if (gpu != NULL) {
+        init_nv_mgr(mgr, gpu);
+        nv_plugin_start(&vm_ctrl);
+    }
+}
 
-    nv_plugin_start(&vm_ctrl);
+/*! \todo Proper logging.
+ */
+void init_nv_mgr(struct VmMgr* mgr, struct NvMdevGpu* mdev_gpu)
+{
+    mgr->nvidia.max_pfn_count = 512 * 1024;
+    mgr->nvidia.guest_cache = calloc(mgr->nvidia.max_pfn_count, sizeof(uint64_t));
+
+    memset(mgr->nvidia.guest_cache, -1, mgr->nvidia.max_pfn_count * sizeof(uint64_t));
+
+    mgr->nvidia.mdev_gpu = mdev_gpu;
 }

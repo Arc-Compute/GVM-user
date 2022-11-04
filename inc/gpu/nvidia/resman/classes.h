@@ -23,5 +23,6 @@
 #include <gpu/nvidia/resman/classes/nv0080.h>
 #include <gpu/nvidia/resman/classes/nv2080.h>
 #include <gpu/nvidia/resman/classes/nvA081.h>
+#include <gpu/nvidia/resman/classes/nvA084.h>
 
 #endif

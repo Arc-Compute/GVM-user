@@ -75,6 +75,8 @@ struct MDevRequest {
     uint32_t enc_cap;             //!< What percentage of the encoder will be
                                   //!< allocated to this mediated device.
     uint32_t bar1_len;            //!< Bar 1 Length.
+    uint32_t partition;           //!< Certain drivers require partition information,
+                                  //!< this variable applies them.
 };
 
 #ifdef __cplusplus

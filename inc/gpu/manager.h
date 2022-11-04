@@ -16,22 +16,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-#ifndef GPU_NVIDIA_MDEV_IOCTL_H
-#define GPU_NVIDIA_MDEV_IOCTL_H
+#ifndef GPU_MANAGER_H
+#define GPU_MANAGER_H
 
-#include <sys/ioctl.h>
+#include <gpu/intel/manager.h>
+#include <gpu/nvidia/resources.h>
 
-#include <gpu/nvidia/mdev/types.h>
+#include <utils/configs.h>
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//! IOCTL helper to create mdev ioctls.
-#define NV_MDEV_CMD(cmd) _IOWR('q', cmd, struct NvMdevIoctl)
+/*! \brief Type of Mediated Device Manager to use.
+ */
+enum MdevType {
+    NVIDIA,          //!< NVIDIA specific MdevMgr
+    INTEL            //!< INTEL specific MdevMgr
+};
 
-//! IOCTL command to create a MDEV event.
-#define NV_MDEV_CREATE_EVENT NV_MDEV_CMD(0x01)
+/*! \brief Mediated Device Manager object that is common between Intel, NVIDIA,
+ *         and more.
+ *
+ * This class handles all forms of mediated device types.
+ */
+struct MdevMgr {
+    enum MdevType type;  //!< Type of the MdevMgr to use.
+    union {
+        struct NvMdev nvidia;
+        struct IntelMdev intel;
+    };
+};
+
+/*! \brief Creates a mediated device manager.
+ */
+struct MdevMgr create_mdev_mgr(struct GpuConfigs &configs);
 
 #ifdef __cplusplus
 };

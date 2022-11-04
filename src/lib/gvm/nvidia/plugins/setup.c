@@ -22,6 +22,8 @@
 
 #include <sys/select.h>
 
+#include <stdlib.h>
+
 /*! \todo Proper logging.
  */
 struct VmListener nv_plugin_env_setup(uint16_t instance_id)
@@ -62,7 +64,7 @@ void nv_plugin_start(struct VmListener *vm_ctrl)
 
         if (FD_ISSET(vm_ctrl->stop_fd, &read_fds)) {
             printf("Attempting to shutdown the VM.\n");
-            break;
+            exit(0);
         } else if (FD_ISSET(vm_ctrl->reg_fd, &read_fds)) {
             printf("Attempting to access a hardware register in the mdev.\n");
         } else if (FD_ISSET(vm_ctrl->reset_fd, &read_fds)) {

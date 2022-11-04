@@ -31,6 +31,9 @@ extern "C" {
 //! Command for rm control res to add a mdev to the list of mdevs.
 #define NVA081_ADD_MDEV 0xA0810101
 
+//! Command for rm control res to notify start for a VM.
+#define NVA081_NOTIFY_START 0xA0810107
+
 //! Command for rm control res to register mdevs.
 #define NVA081_REG_MDEV 0xA0810109
 

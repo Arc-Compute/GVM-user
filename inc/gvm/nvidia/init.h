@@ -19,6 +19,8 @@
 #ifndef GVM_NVIDIA_INIT_H
 #define GVM_NVIDIA_INIT_H
 
+#include <gpu/nvidia/resources.h>
+
 #include <utils/types.h>
 
 #include <stdint.h>
@@ -27,18 +29,31 @@
 extern "C" {
 #endif
 
+/*! \brief This structure is for handling a VM manager specifically for a
+ *         NVIDIA system.
+ *
+ * We built this to provide control regarding a VM for a NVIDIA based GPU.
+ */
+struct NvVmMgr {
+    uint64_t *guest_cache;       //!< Guest PFN to Machine FN cache.
+    uint16_t *guest_ref_cache;   //!< Guest PFN reference count array.
+    uint32_t max_pfn_count;      //!< Initialize to (512 * 1024).
+    struct NvResource* vm;       //!< VM resource.
+    struct NvMdevGpu* mdev_gpu;  //!< Mdev GPU.
+};
+
 /*! \brief Reverse engineered start vm info structure.
  *
  * This structure is used to provide us information regarding how
  * to get the VM information.
  */
 struct RmVmStartInfo {
-    struct UUID uuid;        //!< UUID for the MDEV.
-    char config[1024];       //!< Config for starting the MDEV.
-    uint32_t qemu_pid;       //!< QEMU PID.
-    uint32_t pci_id;         //!< PCI id.
-    uint16_t mdev_id;        //!< MDEV id.
-    uint32_t pci_bdf;        //!< BDF PCI.
+    struct UUID uuid;            //!< UUID for the MDEV.
+    char config[1024];           //!< Config for starting the MDEV.
+    uint32_t qemu_pid;           //!< QEMU PID.
+    uint32_t pci_id;             //!< PCI id.
+    uint16_t mdev_id;            //!< MDEV id.
+    uint32_t pci_bdf;            //!< BDF PCI.
 };
 
 /*! \brief Notifies the start of a VM.
@@ -46,10 +61,10 @@ struct RmVmStartInfo {
  * This structure is used to notify the starting of a VM's
  */
 struct RmVmNotifyStart {
-    struct UUID mdev;        //!< MDEV UUID.
-    struct UUID vm;          //!< VM UUID.
-    char name[128];          //!< VM Name.
-    uint32_t status;         //!< Status for the notified start.
+    struct UUID mdev;            //!< MDEV UUID.
+    struct UUID vm;              //!< VM UUID.
+    char name[128];              //!< VM Name.
+    uint32_t status;             //!< Status for the notified start.
 };
 
 #ifdef __cplusplus

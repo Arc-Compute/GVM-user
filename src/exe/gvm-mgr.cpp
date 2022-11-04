@@ -22,7 +22,7 @@
 
 #include <cargs.h>
 
-#include <gpu/nvidia/manager.h>
+#include <gpu/manager.h>
 #include <gvm/nvidia/manager.h>
 
 #include <utils/configs.h>
@@ -49,6 +49,13 @@ static struct cag_option options[] = {
 .description = "Configuration file to use."
 },
 {
+.identifier = 'b',
+.access_letters = "b",
+.access_name = "boreas",
+.value_name = NULL,
+.description = "Use the Boreas IPC mechanism"
+},
+{
 .identifier = 'h',
 .access_letters = "h",
 .access_name = "help",
@@ -67,6 +74,7 @@ static struct cag_option options[] = {
 int main(int argc, char *argv[])
 {
     char identifier;
+    bool boreas = false;
     const char *config = NULL;
     cag_option_context context;
 
@@ -74,6 +82,9 @@ int main(int argc, char *argv[])
     while (cag_option_fetch(&context)) {
         identifier = cag_option_get(&context);
         switch (identifier) {
+            case 'b':
+                boreas = true;
+                break;
             case 'c':
                 config = cag_option_get_value(&context);
                 break;
@@ -95,22 +106,24 @@ int main(int argc, char *argv[])
     }
 
     struct GpuConfigs configs = get_configs(config);
-    struct NvMdev mgr = create_nv_mgr();
+    create_intel_mgr();
 
-    for (size_t i = 0; i < configs.config_size; ++i) {
-        struct GpuConfig config = configs.configs[i];
-        create_nv_mgr_mdevs(&mgr, config.gpus, config.gpu_size, config.requests, config.mdev_size);
-    }
+    // struct NvMdev mgr = create_nv_mgr();
 
-    register_nv_mgr_mdevs(&mgr);
+    // for (size_t i = 0; i < configs.config_size; ++i) {
+    //     struct GpuConfig config = configs.configs[i];
+    //     create_nv_mgr_mdevs(&mgr, config.gpus, config.gpu_size, config.requests, config.mdev_size);
+    // }
 
-    printf("Registered MDevs on the system.\n");
+    // register_nv_mgr_mdevs(&mgr);
 
-    struct VmMgr vm_mgr = init_nv_vm_mgr(&mgr);
+    // printf("Registered MDevs on the system.\n");
 
-    while (true) {
-        handle_vm_start(&vm_mgr, &mgr);
-    }
+    // struct VmMgr vm_mgr = init_nv_vm_mgr(&mgr);
 
-    free_nv_mgr(&mgr);
+    // while (true) {
+    //     handle_nv_vm_start(&vm_mgr, &mgr);
+    // }
+
+    // free_nv_mgr(&mgr);
 }

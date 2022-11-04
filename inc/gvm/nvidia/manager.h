@@ -20,6 +20,7 @@
 #define GVM_NVIDIA_MANAGER_H
 
 #include <gpu/nvidia/resources.h>
+
 #include <gvm/vm_mgr.h>
 
 #ifdef __cplusplus
@@ -48,7 +49,7 @@ struct VmMgr init_nv_vm_mgr(struct NvMdev* mdevs);
  * \param mdev_mgr - Manager for the mediated devices.
  * \return Only performed for the side effects.
  */
-void handle_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr);
+void handle_nv_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr);
 
 /*! \brief Connects the VM to the user program.
  *
@@ -60,7 +61,19 @@ void handle_vm_start(struct VmMgr* mgr, struct NvMdev* mdev_mgr);
  * \param mdev_mgr - Manager for the mediated devices.
  * \return Only performed for the side effects.
  */
-void start_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr);
+void start_nv_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr);
+
+/*! \brief Initializes the VM manager system for NVIDIA.
+ *
+ * This code initializes the mdev to be passed into a VM.
+ *
+ * \sideeffect RM Side Effect: Initializes a mdev device to be run in the kernel.
+ *
+ * \param mgr - Manager for the VM management system.
+ * \param mdev_gpu - Mdev gpu for the system.
+ * \return Only performed for the side effects.
+ */
+void init_nv_mgr(struct VmMgr* mgr, struct NvMdevGpu* mdev_gpu);
 
 #ifdef __cplusplus
 };
