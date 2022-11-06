@@ -32,6 +32,7 @@ extern "C" {
  * This determines how to control the INTEL vGPU on runtime.
  */
 struct IntelVF {
+    struct Gpu *gpu;                     //!< GPU to help with responses.
     uint32_t fn;                         //!< Function for the virtual function in the DBSF format.
     size_t fb;                           //!< Framebuffer size.
     int active;                          //!< If the VF is active or not.

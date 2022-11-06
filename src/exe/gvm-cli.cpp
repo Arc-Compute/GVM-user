@@ -22,7 +22,7 @@
 
 #include <cargs.h>
 
-#include <gpu/nvidia/manager.h>
+#include <gpu/manager.h>
 
 #include <utils/configs.h>
 

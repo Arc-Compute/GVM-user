@@ -312,6 +312,7 @@ struct IntelVF* find_vf(struct IntelMdev *mgr, uint32_t num)
             for (size_t k = 0; k < gpu->partitions; ++k) {
                 if (gpu->vfs[k] == NULL) {
                     gpu->vfs[k] = calloc(1, sizeof(struct IntelVF));
+                    gpu->vfs[k]->gpu = &gpu->gpu;
                     gpu->vfs[k]->fn = k + 1;
                     gpu->vfs[k]->fb = mdev->fb_len;
                     gpu->vfs[k]->active = 0;
@@ -362,6 +363,11 @@ void remove_vf(struct IntelMdev *mgr, struct Gpu *vgpu)
             gpu->gpu.slot == vgpu->slot) {
             struct IntelVF *vf = gpu->vfs[vgpu->function - 1];
 
+            if (vf == NULL) {
+                printf("VF already deleted.\n");
+                break;
+            }
+
             if (vf->fn != vgpu->function || !vf->active) {
                 printf("Incorrect VF.\n");
                 continue;
@@ -377,6 +383,8 @@ void remove_vf(struct IntelMdev *mgr, struct Gpu *vgpu)
             if (gpu->remaining == gpu->partitions && gpu->used_fb == 0) {
                 clear_gpu(gpu);
             }
+
+            break;
         }
     }
 }

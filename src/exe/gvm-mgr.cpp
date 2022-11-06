@@ -26,6 +26,10 @@
 
 #include <utils/configs.h>
 
+#ifdef BOREAS
+#include <boreas/device.h>
+#endif
+
 using std::cout;
 
 /*! \page gvm-mgr GVM Manager
@@ -109,10 +113,14 @@ int main(int argc, char *argv[])
 
     printf("Registered mediated devices.\n");
 
+#ifdef BOREAS
     if (boreas) {
         printf("Setting up Boreas IPC...\n");
 
+        init_boreas(&mgr);
+        run_boreas();
     }
+#endif
 
     free_mdev_mgr(&mgr);
 }
