@@ -65,6 +65,26 @@ void create_intel_mgr_mdevs(
     size_t mdev_size
 );
 
+/*! \brief Finds an available VF to send out.
+ *
+ * This allocates the VF to be used in the INTEL GPU.
+ *
+ * \param mgr - Manager for selecting the VF to use.
+ * \param num - Number of mdev.
+ * \return Provides an active VF for use in the manager.
+ */
+struct IntelVF* find_vf(struct IntelMdev *mgr, uint32_t num);
+
+/*! \brief Frees the given VF string.
+ *
+ * This deallocates a VF using a string to identify which VF to use.
+ *
+ * \param mgr - Manager to deallocate the VFs.
+ * \param gpu - Gpu to deallocate.
+ * \return Performed for side effects only.
+ */
+void remove_vf(struct IntelMdev *mgr, struct Gpu *vgpu);
+
 #ifdef __cplusplus
 };
 #endif

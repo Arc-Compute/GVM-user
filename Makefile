@@ -44,7 +44,7 @@ CC := gcc
 CXX := g++
 LD := g++
 
-DEFS := -DRM_VERSION="\"$(RM_VERSION)\""
+DEFS := -DRM_VERSION="\"$(RM_VERSION)\"" -DBOREAS
 GENFLAGS := -c -g -Og -I inc -I extern/inc -Wall -Wextra $(DEFS)
 
 ASMFLAGS := $(GENFLAGS)

@@ -23,7 +23,6 @@
 #include <cargs.h>
 
 #include <gpu/manager.h>
-#include <gvm/nvidia/manager.h>
 
 #include <utils/configs.h>
 
@@ -106,24 +105,14 @@ int main(int argc, char *argv[])
     }
 
     struct GpuConfigs configs = get_configs(config);
-    create_intel_mgr();
+    struct MdevMgr mgr = create_mdev_mgr(configs);
 
-    // struct NvMdev mgr = create_nv_mgr();
+    printf("Registered mediated devices.\n");
 
-    // for (size_t i = 0; i < configs.config_size; ++i) {
-    //     struct GpuConfig config = configs.configs[i];
-    //     create_nv_mgr_mdevs(&mgr, config.gpus, config.gpu_size, config.requests, config.mdev_size);
-    // }
+    if (boreas) {
+        printf("Setting up Boreas IPC...\n");
 
-    // register_nv_mgr_mdevs(&mgr);
+    }
 
-    // printf("Registered MDevs on the system.\n");
-
-    // struct VmMgr vm_mgr = init_nv_vm_mgr(&mgr);
-
-    // while (true) {
-    //     handle_nv_vm_start(&vm_mgr, &mgr);
-    // }
-
-    // free_nv_mgr(&mgr);
+    free_mdev_mgr(&mgr);
 }

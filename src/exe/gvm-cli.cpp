@@ -97,16 +97,9 @@ int main(int argc, char *argv[])
     }
 
     struct GpuConfigs configs = get_configs(config);
-    struct NvMdev mgr = create_nv_mgr();
+    struct MdevMgr mgr = create_mdev_mgr(configs);
 
-    for (size_t i = 0; i < configs.config_size; ++i) {
-        struct GpuConfig config = configs.configs[i];
-        create_nv_mgr_mdevs(&mgr, config.gpus, config.gpu_size, config.requests, config.mdev_size);
-    }
+    printf("Registered configs\n");
 
-    register_nv_mgr_mdevs(&mgr);
-
-    printf("Registered MDevs on the system.\n");
-
-    free_nv_mgr(&mgr);
+    free_mdev_mgr(&mgr);
 }

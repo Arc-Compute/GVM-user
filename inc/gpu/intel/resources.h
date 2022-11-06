@@ -32,7 +32,7 @@ extern "C" {
  * This determines how to control the INTEL vGPU on runtime.
  */
 struct IntelVF {
-    int fn;                              //!< Function for the virtual function in the DBSF format.
+    uint32_t fn;                         //!< Function for the virtual function in the DBSF format.
     size_t fb;                           //!< Framebuffer size.
     int active;                          //!< If the VF is active or not.
     int control_fd;                      //!< Control file descriptor.
@@ -44,12 +44,13 @@ struct IntelVF {
  */
 struct IntelMdevGpu {
     struct Gpu gpu;                      //!< GPU structure corresponding to the GPU.
+    uint32_t num;                        //!< Mediated device to use.
     size_t max_fb;                       //!< Maximum allocatable framebuffer.
     size_t partitions;                   //!< Number of partitions so far.
     size_t used_fb;                      //!< Framebuffer currently being used.
     size_t remaining;                    //!< Remaining number of partitions available.
     struct IntelVF *vfs[31];             //!< Maximum possible VFs on Intel is 31 VFs.
-    struct MDevRequests *available[128]; //!< Available mdevs on the GPU.
+    struct MDevRequest *available[128];  //!< Available mdevs on the GPU.
 };
 
 /*! \brief Structure for managing the mediated stack.

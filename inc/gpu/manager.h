@@ -33,6 +33,7 @@ extern "C" {
 /*! \brief Type of Mediated Device Manager to use.
  */
 enum MdevType {
+    INVALID,         //!< Invalid MdevMgr
     NVIDIA,          //!< NVIDIA specific MdevMgr
     INTEL            //!< INTEL specific MdevMgr
 };
@@ -44,15 +45,27 @@ enum MdevType {
  */
 struct MdevMgr {
     enum MdevType type;  //!< Type of the MdevMgr to use.
-    union {
-        struct NvMdev nvidia;
-        struct IntelMdev intel;
-    };
+    struct NvMdev nvidia;
+    struct IntelMdev intel;
 };
 
 /*! \brief Creates a mediated device manager.
+ *
+ * Creates the necessary mdev manager.
+ *
+ * \param configs - Configurations to set.
+ * \return Manager for the MDev.
  */
-struct MdevMgr create_mdev_mgr(struct GpuConfigs &configs);
+struct MdevMgr create_mdev_mgr(struct GpuConfigs configs);
+
+/*! \brief Frees the mediated device manager.
+ *
+ * Deletes the mediated device manager.
+ *
+ * \param mgr - Pointer to manager object.
+ * \return Performed for side effects.
+ */
+void free_mdev_mgr(struct MdevMgr *mgr);
 
 #ifdef __cplusplus
 };

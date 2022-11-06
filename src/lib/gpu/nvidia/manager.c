@@ -218,7 +218,7 @@ void create_nv_mgr_mdevs(
                  req_gpu.identifier == ggpu->identifier);
         }
 
-        if (!valid && limited != NULL && gpu_size > 0)
+        if (!valid)
             continue;
 
         for (size_t j = 0; j < mdev_size; ++j) {
