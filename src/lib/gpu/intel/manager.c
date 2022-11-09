@@ -30,6 +30,22 @@
 #define RESUME "resume"
 #define CLEAR "clear"
 
+static void enable_vfio_pci(const int vendor, const int device)
+{
+    const char *vfio_pci_name = "/sys/bus/pci/drivers/vfio-pci/new_id";
+    int vfio_pci_file = open(vfio_pci_name, O_WRONLY);
+
+    if (vfio_pci_file != -1) {
+        char data[1024] = {};
+        sprintf(data, "%.4x %.4x", vendor, device);
+        printf("Enabling vfio pci for: %s\n", data);
+        if (write(vfio_pci_file, data, strlen(data)) == -1) perror("Failed to enable vfio_pci for device");
+        close(vfio_pci_file);
+    } else {
+        printf("Cannot enable vfio_pci for device.\n");
+    }
+}
+
 static void set_numvfs(const int id, const int numvfs)
 {
     const char *device_folder = "/sys/class/drm/card%d/device";
@@ -41,38 +57,26 @@ static void set_numvfs(const int id, const int numvfs)
     sprintf(autoprobe_name, "%s/sriov_drivers_autoprobe", drm_card);
     sprintf(numvfs_name, "%s/sriov_numvfs", drm_card);
 
-    FILE *autoprobe_file = fopen(autoprobe_name, "w");
-    FILE *numvfs_file = fopen(numvfs_name, "w");
+    int autoprobe_file = open(autoprobe_name, O_WRONLY);
+    int numvfs_file = open(numvfs_name, O_WRONLY);
 
     printf("Updating autoprobe to false for card%d\n", id);
 
-    if (autoprobe_file) {
-        fprintf(autoprobe_file, "%d", 0);
-    }
+    if (autoprobe_file != -1)
+        if (write(autoprobe_file, "0", 1) == -1) perror("autoprobe");
 
     printf("Setting numvfs for card%d to %d\n", id, numvfs);
 
-    if (numvfs_file) {
-        fprintf(numvfs_file, "%d", numvfs);
-        fclose(numvfs_file);
+    if (numvfs_file != -1) {
+        sprintf(numvfs_name, "%d", numvfs);
+        if (write(numvfs_file, numvfs_name, strlen(numvfs_name)) == -1) perror("numvfs");
     }
 
     printf("Updating autoprobe to true for card%d\n", id);
 
-    if (autoprobe_file) {
-        fprintf(autoprobe_file, "%d", 1);
-        fclose(autoprobe_file);
-    }
-}
-
-static void enable_vfio_pci(const int vendor, const int device)
-{
-    const char *vfio_pci_name = "/sys/bus/pci/drivers/vfio-pci/new_id";
-    FILE *vfio_pci_file = fopen(vfio_pci_name, "w");
-
-    if (vfio_pci_file) {
-        fprintf(vfio_pci_file, "%.4x %.4x", vendor, device);
-        fclose(vfio_pci_file);
+    if (autoprobe_file != -1) {
+        if (write(autoprobe_file, "1", 1) == -1) perror("autoprobe");
+        close(autoprobe_file);
     }
 }
 
