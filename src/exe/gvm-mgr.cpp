@@ -23,6 +23,7 @@
 #include <cargs.h>
 
 #include <gpu/manager.h>
+#include <gvm/nvidia/manager.h>
 
 #include <utils/configs.h>
 
@@ -77,7 +78,11 @@ static struct cag_option options[] = {
 int main(int argc, char *argv[])
 {
     char identifier;
+
+#ifdef BOREAS
     bool boreas = false;
+#endif
+
     const char *config = NULL;
     cag_option_context context;
 
@@ -86,7 +91,9 @@ int main(int argc, char *argv[])
         identifier = cag_option_get(&context);
         switch (identifier) {
             case 'b':
+#ifdef BOREAS
                 boreas = true;
+#endif
                 break;
             case 'c':
                 config = cag_option_get_value(&context);
@@ -121,6 +128,12 @@ int main(int argc, char *argv[])
         run_boreas();
     }
 #endif
+
+    struct VmMgr vm_mgr = init_nv_vm_mgr(&mgr.nvidia);
+
+    while (1) {
+        handle_nv_vm_start(&vm_mgr, &mgr.nvidia);
+    }
 
     free_mdev_mgr(&mgr);
 }

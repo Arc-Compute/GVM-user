@@ -46,6 +46,23 @@ struct Nv0080AllocParams {
     uint32_t vaMode;                     //!< Virtual address mode.
 };
 
+//! Command to get the graphical capabilities.
+#define NV0080_GET_GR_CAPS_V2 0x00801109
+
+//! Special thanks to NVIDIA open source kernel module.
+#define NV0080_CTRL_GR_CAPS_TBL_SIZE            23
+
+struct Nv0080CtrlGRInfo {
+    uint32_t flags;
+    uint64_t route;
+};
+
+struct Nv0080CtrlGRGetCapsV2 {
+    uint8_t caps_table[NV0080_CTRL_GR_CAPS_TBL_SIZE];
+    struct Nv0080CtrlGRInfo gr_route_info;
+    uint8_t bCapsPopulated;
+};
+
 #ifdef __cplusplus
 };
 #endif

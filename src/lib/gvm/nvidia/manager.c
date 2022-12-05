@@ -40,6 +40,57 @@ static inline uint32_t compose_vm_id(uint32_t t, uint32_t i)
     return 0xDAE00000 | (t << 8) | i;
 }
 
+/*! \brief Inline function to create engine IDs. */
+static inline uint32_t compose_engine_id(uint32_t t, uint32_t i)
+{
+    return (t << 8) | (i & ((1 << 8) - 1));
+}
+
+static inline const char* ram_type_name(const uint32_t ram_type)
+{
+    switch (ram_type) {
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_SDRAM:
+            return "SDRAM";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_DDR1:
+            return "DDR1";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_SDDR2:
+            return "SDDR2";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR2:
+            return "GDDR2";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR3:
+            return "GDDR3";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR4:
+            return "GDDR4";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_SDDR3:
+            return "SDDR3";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR5:
+            return "GDDR5";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_LPDDR2:
+            return "LPDDR2";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_SDDR4:
+            return "SDDR4";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_LPDDR4:
+            return "LPDDR4";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_HBM1:
+            return "HBM1";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_HBM2:
+            return "HBM2";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR5X:
+            return "GDDR5";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR6:
+            return "GDDR6";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_GDDR6X:
+            return "GDDR6X";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_LPDDR5:
+            return "LPDDR5";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_HBM3:
+            return "HBM3";
+        case NV2080_CTRL_FB_INFO_RAM_TYPE_UNKNOWN:
+        default:
+            return "<unknown>";
+    };
+}
+
 /*! \brief Code to initialize events for the VM manager.
  *
  * This makes a event handler for the VM manager.
@@ -171,6 +222,10 @@ void start_nv_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
     vm_uuid.node[4] = 0x9D;
     vm_uuid.node[5] = 0xE5;
 
+    mgr->nvidia.vm_uuid = vm_uuid;
+    mgr->nvidia.pid = vm_start_info.qemu_pid;
+    mgr->nvidia.mdev_id = vm_start_info.mdev_id;
+
     printf(
         "MDEV UUID: %.8X-%.4X-%.4X-%.2X%.2X-%.2X%.2X%.2X%.2X%.2X%.2X\n"
         "Got config \"%s\" for QEMU PID %d\n"
@@ -217,10 +272,177 @@ void start_nv_vm(struct VmMgr* mgr, struct NvMdev* mdev_mgr)
  */
 void init_nv_mgr(struct VmMgr* mgr, struct NvMdevGpu* mdev_gpu)
 {
+    const uint32_t FB_INFO_VALUES[16] = {
+    NV2080_CTRL_FB_INFO_INDEX_RAM_SIZE,
+    NV2080_CTRL_FB_INFO_INDEX_BANK_SWIZZLE_ALIGNMENT,
+    NV2080_CTRL_FB_INFO_INDEX_RAM_SIZE,
+    NV2080_CTRL_FB_INFO_INDEX_BUS_WIDTH,
+    NV2080_CTRL_FB_INFO_INDEX_RAM_TYPE,
+    NV2080_CTRL_FB_INFO_INDEX_PARTITION_MASK,
+    NV2080_CTRL_FB_INFO_INDEX_FBP_COUNT,
+    NV2080_CTRL_FB_INFO_INDEX_FBP_MASK,
+    NV2080_CTRL_FB_INFO_INDEX_L2CACHE_SIZE,
+    NV2080_CTRL_FB_INFO_INDEX_1TO1_COMPTAG_ENABLED,
+    NV2080_CTRL_FB_INFO_INDEX_ALLOW_PAGE_RETIREMENT,
+    NV2080_CTRL_FB_INFO_POISON_FUSE_ENABLED,
+    NV2080_CTRL_FB_INFO_FBPA_ECC_ENABLED,
+    NV2080_CTRL_FB_INFO_DYNAMIC_PAGE_OFFLINING_ENABLED,
+    NV2080_CTRL_FB_INFO_INDEX_LTC_MASK,
+    NV2080_CTRL_FB_INFO_INDEX_LTS_COUNT
+    };
+
+    struct Nv2080CtrlDMAGetInfoParams dma_info = {};
+    struct Nv2080CtrlFIFOGetPhysicalChannelCount physical_count = {};
+    struct Nv2080GetFBInfoV2 fb_info = {};
+    struct Nv0080CtrlGRGetCapsV2 gr_caps = {};
+    struct NvA082AllocParams a082_alloc_params = {};
+    struct NvA084AllocParams a084_alloc_params = {};
+
     mgr->nvidia.max_pfn_count = 512 * 1024;
     mgr->nvidia.guest_cache = calloc(mgr->nvidia.max_pfn_count, sizeof(uint64_t));
 
     memset(mgr->nvidia.guest_cache, -1, mgr->nvidia.max_pfn_count * sizeof(uint64_t));
+
+    mgr->nvidia.fb_length = 256 * 1024 * 1024;
+
+    // magic stuff i do not know yet (TODO: SUPPORT SR-IOV MODE).
+    mgr->nvidia.mdev_caps = 0b00000000000000000010000011110101; // | 0x2 to set cuda mode, disabled by default.
+    mgr->nvidia.writeable_mdev_caps = 0b00000000000000000000010011100000;
+
+    dma_info.table_size = 1;
+    fb_info.table_size = 16;
+
+    for (int i = 0; i < 16; ++i) {
+        fb_info.fb_info[i].index = FB_INFO_VALUES[i];
+    }
+
+    RM_CTRL(
+        mdev_gpu->ctl_fd,
+        mdev_gpu->sdev,
+        NV2080_GET_DMA_INFO,
+        dma_info
+    );
+    RM_CTRL(
+        mdev_gpu->ctl_fd,
+        mdev_gpu->sdev,
+        NV2080_FIFO_GET_PHYSICAL_CHANNEL_COUNT,
+        physical_count
+    );
+    RM_CTRL(
+        mdev_gpu->ctl_fd,
+        mdev_gpu->sdev,
+        NV2080_GET_FB_INFO_V2,
+        fb_info
+    );
+    RM_CTRL(
+        mdev_gpu->ctl_fd,
+        mdev_gpu->dev,
+        NV0080_GET_GR_CAPS_V2,
+        gr_caps
+    );
+
+    mgr->nvidia.gid.flags = 0x00000002;
+
+    RM_CTRL(
+        mdev_gpu->ctl_fd,
+        mdev_gpu->sdev,
+        NV2080_GPU_GET_GID_INFO,
+        mgr->nvidia.gid
+    );
+
+    a084_alloc_params.mdev_dev_id = mdev_gpu->root;
+    a084_alloc_params.weird_stuff = 1;
+    a084_alloc_params.vm_pid = mgr->nvidia.pid;
+    a084_alloc_params.uuid_or_magic = mgr->nvidia.vm_uuid;
+
+    mgr->nvidia.mdev_dev_id = compose_vm_id(
+        mgr->nvidia.mdev_id,
+        5
+    );
+    mgr->nvidia.mdev_dev_id2 = compose_vm_id(
+        mgr->nvidia.mdev_id,
+        6
+    );
+
+    a082_alloc_params.mdev_instance_id = mdev_gpu->root;
+    a082_alloc_params.vm_id_type = 1;
+    a082_alloc_params.vm_id = mgr->nvidia.vm_uuid;
+    a082_alloc_params.vm_pid = mgr->nvidia.pid;
+
+    mgr->nvidia.mdev_device = rm_alloc_res(
+        mdev_gpu->ctl_fd, mdev_gpu->sdev, mgr->nvidia.mdev_dev_id,
+        NVA084_CLASS, &a084_alloc_params
+    );
+
+    mgr->nvidia.mdev_device2 = rm_alloc_res(
+        mdev_gpu->ctl_fd, mdev_gpu->sdev, mgr->nvidia.mdev_dev_id2,
+        NVA082_CLASS, &a082_alloc_params
+    );
+
+    mgr->nvidia.max_mfn = ((uint64_t) 1) << (dma_info.dma_info[0].value - 12);
+    mgr->nvidia.fifo_channel_count = physical_count.physical_channel_count;
+    mgr->nvidia.gpu_fb_mbs = fb_info.fb_info[0].value >> 10;
+    mgr->nvidia.fb_info.bank_sizzle_align = fb_info.fb_info[1].value;
+    mgr->nvidia.fb_info.fb_len_mbs = fb_info.fb_info[2].value >> 10;
+    mgr->nvidia.fb_info.fb_bus_width = fb_info.fb_info[3].value;
+    mgr->nvidia.fb_info.ram_type = fb_info.fb_info[4].value;
+    mgr->nvidia.fb_info.fbio_mask = fb_info.fb_info[5].value;
+    mgr->nvidia.fb_info.fbp_count = fb_info.fb_info[6].value;
+    mgr->nvidia.fb_info.fbp_mask = fb_info.fb_info[7].value;
+    mgr->nvidia.fb_info.l2_cache_size = fb_info.fb_info[8].value;
+    mgr->nvidia.fb_info.comptag_1to1_enabled = fb_info.fb_info[9].value != 0;
+    mgr->nvidia.fb_info.page_retirement_enabled = fb_info.fb_info[10].value != 0;
+    mgr->nvidia.fb_info.poison_fuse_enabled = fb_info.fb_info[11].value != 0;
+    mgr->nvidia.fb_info.fbpa_ecc_vbios_enabled = fb_info.fb_info[12].value != 0;
+    mgr->nvidia.fb_info.dynamic_blacklist_enabled = fb_info.fb_info[13].value != 0;
+    mgr->nvidia.fb_info.ltc_mask = fb_info.fb_info[14].value;
+    mgr->nvidia.fb_info.lts_count = fb_info.fb_info[15].value;
+
+    memcpy(
+        mgr->nvidia.gr_caps,
+        gr_caps.caps_table,
+        NV0080_CTRL_GR_CAPS_TBL_SIZE
+    );
+
+    printf(
+        "Maximum MFNs supported: %ld\n"
+        "Maximum FIFO physical channels supported: %d\n"
+        "Size of total GPU framebuffer: %d MBs\n"
+        "FB INFO:\n"
+        "\tbank_sizzle_align: %d\n"
+        "\tfb_len_mbs: %d\n"
+        "\tfb_bus_width: %d\n"
+        "\tram_type: %s\n"
+        "\tfbio_mask: %d\n"
+        "\tfbp_count: %d\n"
+        "\tfbp_mask: %d\n"
+        "\tl2_cache_size: %d\n"
+        "\tcomptag_1to1_enabled: %d\n"
+        "\tpage_retirement_enabled: %d\n"
+        "\tpoison_fuse_enabled: %d\n"
+        "\tfbpa_ecc_vbios_enabled: %d\n"
+        "\tdynamic_blacklist_enabled: %d\n"
+        "\tltc_mask: %d\n"
+        "\tlts_count: %d\n",
+        mgr->nvidia.max_mfn,
+        mgr->nvidia.fifo_channel_count,
+        mgr->nvidia.gpu_fb_mbs,
+        mgr->nvidia.fb_info.bank_sizzle_align,
+        mgr->nvidia.fb_info.fb_len_mbs,
+        mgr->nvidia.fb_info.fb_bus_width,
+        ram_type_name(mgr->nvidia.fb_info.ram_type),
+        mgr->nvidia.fb_info.fbio_mask,
+        mgr->nvidia.fb_info.fbp_count,
+        mgr->nvidia.fb_info.fbp_mask,
+        mgr->nvidia.fb_info.l2_cache_size,
+        mgr->nvidia.fb_info.comptag_1to1_enabled,
+        mgr->nvidia.fb_info.page_retirement_enabled,
+        mgr->nvidia.fb_info.poison_fuse_enabled,
+        mgr->nvidia.fb_info.fbpa_ecc_vbios_enabled,
+        mgr->nvidia.fb_info.dynamic_blacklist_enabled,
+        mgr->nvidia.fb_info.ltc_mask,
+        mgr->nvidia.fb_info.lts_count
+    );
 
     mgr->nvidia.mdev_gpu = mdev_gpu;
 }

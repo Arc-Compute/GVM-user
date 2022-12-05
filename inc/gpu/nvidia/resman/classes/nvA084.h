@@ -61,6 +61,11 @@ struct NvA084AllocParams {
     uint64_t ctrl_offset;                       //!< Control buffer offset.
 };
 
+struct NvA084SetMdev {
+    struct UUID uuid;
+    uint32_t mdev_dev_id;
+};
+
 #ifdef __cplusplus
 };
 #endif
