@@ -7,7 +7,7 @@
     v_dev_id = 0x1B301B30
     p_dev_id = 0x1B30
     name = "GVM GPU"
-    class = "Compute"
+    class = "Quadro"
     fb_len = 896
     max_instances = 1
     ecc = False
