@@ -18,9 +18,11 @@
 NAME := GVM User Suite
 VERSION := 0.1.0.0
 
-RM_MAJOR := 525
-RM_MINOR := 60
-RM_PATCH := 13
+RM_MAJOR ?= 525
+RM_MINOR ?= 60
+RM_PATCH ?= 13
+
+SDK := sdks/nv$(RM_MAJOR)
 
 # Recursive wildcard function
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
@@ -48,7 +50,7 @@ CXX := g++
 LD := g++
 
 DEFS := -DRM_VERSION="\"$(RM_MAJOR).$(RM_MINOR).$(RM_PATCH)\""
-NVFLAGS := -I sdks/nvidia/inc -I sdks/nvalloc/common/inc -I sdks/nvalloc/unix/include
+NVFLAGS := -I $(SDK)/nvidia/inc -I $(SDK)/nvalloc/common/inc -I $(SDK)/nvalloc/unix/include -DNVTYPES_USE_STDINT=1
 GENFLAGS := -c -g -Og -I inc -I extern/inc -Wall -Wextra $(DEFS)
 
 ASMFLAGS := $(GENFLAGS)

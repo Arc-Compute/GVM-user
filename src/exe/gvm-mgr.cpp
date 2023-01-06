@@ -23,7 +23,7 @@
 #include <cargs.h>
 
 #include <gpu/nvidia/manager.h>
-#include <gvm/nvidia/manager.h>
+// #include <gvm/nvidia/manager.h>
 
 #include <utils/configs.h>
 
@@ -106,11 +106,11 @@ int main(int argc, char *argv[])
 
     printf("Registered MDevs on the system.\n");
 
-    struct VmMgr vm_mgr = init_nv_vm_mgr(&mgr);
+    // struct VmMgr vm_mgr = init_nv_vm_mgr(&mgr);
 
-    while (true) {
-        handle_vm_start(&vm_mgr, &mgr);
-    }
+    // while (true) {
+    //     handle_vm_start(&vm_mgr, &mgr);
+    // }
 
     free_nv_mgr(&mgr);
 }

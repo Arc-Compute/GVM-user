@@ -3,11 +3,11 @@
     vendor_id = 0x10DE
 
     [[config.request]]
-    num = 22
+    num = 23
     v_dev_id = 0x1B301B30
     p_dev_id = 0x1B30
     name = "GVM GPU"
-    class = "Quadro"
+    class = "Compute"
     fb_len = 896
     max_instances = 1
     ecc = False
@@ -17,5 +17,6 @@
     enc_cap = 100
     bar1_len = 0x100
         [config.request.display]
+        num_heads = 1
         max_res_x = 3840
         max_res_y = 2160
