@@ -1,19 +1,7 @@
 /*
- * Copyright (C) 2022 2666680 Ontario Inc.
+ * Copyright (C) 2666680 Ontario Inc.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * SPDX-License-Identifier: GPL-2.0+
  *
  */
 #include <utils/configs.h>
@@ -182,25 +170,29 @@ struct GpuConfigs get_configs(const char* name)
             ret.configs[i].requests[j].disp->num_heads =
                 info.ok ? info.u.i : 1;
 
+            info.ok = 0;
             if (display)
                 info = toml_int_in(display, "max_res_x");
             ret.configs[i].requests[j].disp->max_res_x =
                 info.ok ? info.u.i : 1024;
 
+            info.ok = 0;
             if (display)
                 info = toml_int_in(display, "max_res_y");
             ret.configs[i].requests[j].disp->max_res_y =
                 info.ok ? info.u.i : 1024;
 
+            info.ok = 0;
             if (display)
                 info = toml_int_in(display, "frl_config");
-            ret.configs[i].requests[j].disp->num_heads =
+            ret.configs[i].requests[j].disp->frl_config =
                 info.ok ? info.u.i : 120;
 
+            info.ok = 0;
             if (display)
                 info = toml_int_in(display, "frl_enable");
-            ret.configs[i].requests[j].disp->num_heads =
-                info.ok ? info.u.i : 0;
+            ret.configs[i].requests[j].disp->frl_enable =
+                info.ok ? info.u.i : 1;
         }
     }
 

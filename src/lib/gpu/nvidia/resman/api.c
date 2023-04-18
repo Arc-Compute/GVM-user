@@ -204,20 +204,18 @@ void* rm_ctrl_res(int fd, uint32_t client, uint32_t device, uint32_t command, vo
     return NULL;
 }
 
-#if 0
 /*! \todo Proper logging if a failure occurs.
  */
 uint8_t rm_alloc_os_event(int fd, uint32_t client_id, uint32_t device_id)
 {
-    struct RmAllocOsEvent event = {};
+    nv_ioctl_alloc_os_event_t event = {};
 
-    event.client = client_id;
-    event.device = device_id;
+    event.hClient = client_id;
+    event.hDevice = device_id;
     event.fd = fd;
 
-    if (ioctl(fd, NV_CREATE_OS_EVENT, &event) == -1 || event.status != 0)
+    if (ioctl(fd, NV_ALLOC_OS_EVENT, &event) == -1 || event.Status != 0)
         return 0;
 
-    return event.status == 0;
+    return event.Status == 0;
 }
-#endif

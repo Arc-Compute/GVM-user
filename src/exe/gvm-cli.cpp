@@ -1,19 +1,7 @@
 /*
- * Copyright (C) 2022 2666680 Ontario Inc.
+ * Copyright (C) 2666680 Ontario Inc.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * SPDX-License-Identifier: GPL-2.0+
  *
  */
 #include <iostream>
@@ -22,7 +10,7 @@
 
 #include <cargs.h>
 
-#include <gpu/nvidia/manager.h>
+#include <gvm/legal.h>
 
 #include <utils/configs.h>
 
@@ -83,7 +71,7 @@ int main(int argc, char *argv[])
                 printf("HELP THE FALCONS ARE CHASING ME...\n");
                 return 0;
             case 'h':
-                printf("Copyright (C) 2022  2666680 Ontario Inc. O\\A Arc Compute\n\nThis program is free software; you can redistribute it and/or\nmodify it under the terms of the GNU General Public License\nas published by the Free Software Foundation; either version 2\nof the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program; if not, write to the Free Software\nFoundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.\n\n");
+                printf(GVM_COPYRIGHT);
                 printf("Usage: gvm-cli [OPTION]...\n");
                 printf("Reimplementation of mdev-gpu under the GVM User Suite\n\n");
                 cag_option_print(options, CAG_ARRAY_SIZE(options), stdout);
@@ -95,18 +83,4 @@ int main(int argc, char *argv[])
         printf("Why must the Tensor Cores crush the little cpu man?\n");
         return 0;
     }
-
-    struct GpuConfigs configs = get_configs(config);
-    struct NvMdev mgr = create_nv_mgr();
-
-    for (size_t i = 0; i < configs.config_size; ++i) {
-        struct GpuConfig config = configs.configs[i];
-        create_nv_mgr_mdevs(&mgr, config.gpus, config.gpu_size, config.requests, config.mdev_size);
-    }
-
-    register_nv_mgr_mdevs(&mgr);
-
-    printf("Registered MDevs on the system.\n");
-
-    free_nv_mgr(&mgr);
 }

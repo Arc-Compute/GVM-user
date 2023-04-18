@@ -19,8 +19,8 @@ NAME := GVM User Suite
 VERSION := 0.1.0.0
 
 RM_MAJOR ?= 525
-RM_MINOR ?= 60
-RM_PATCH ?= 13
+RM_MINOR ?= 85
+RM_PATCH ?= 07
 
 SDK := sdks/nv$(RM_MAJOR)
 
@@ -50,13 +50,13 @@ CXX := g++
 LD := g++
 
 DEFS := -DRM_VERSION="\"$(RM_MAJOR).$(RM_MINOR).$(RM_PATCH)\""
-NVFLAGS := -I $(SDK)/nvidia/inc -I $(SDK)/nvalloc/common/inc -I $(SDK)/nvalloc/unix/include -DNVTYPES_USE_STDINT=1
+NVFLAGS := -I $(SDK)/nvidia/inc -I $(SDK)/nvalloc/common/inc -I $(SDK)/nvalloc/unix/include -I $(SDK)/nvml/ -DNVTYPES_USE_STDINT=1
 GENFLAGS := -c -g -Og -I inc -I extern/inc -Wall -Wextra $(DEFS)
 
 ASMFLAGS := $(GENFLAGS)
 CFLAGS := $(GENFLAGS) $(NVFLAGS)
 CXXFLAGS := $(CFLAGS) $(NVFLAGS)
-LDFLAGS :=
+LDFLAGS := -rdynamic -ldl -lnvidia-ml
 
 all: lib
 	$(MAKE) execs

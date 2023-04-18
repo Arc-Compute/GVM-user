@@ -1,19 +1,7 @@
 /*
- * Copyright (C) 2022 2666680 Ontario Inc.
+ * Copyright (C) 2666680 Ontario Inc.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * SPDX-License-Identifier: GPL-2.0+
  *
  */
 #ifndef GPU_NVIDIA_RESOURCES_H
@@ -21,7 +9,11 @@
 
 #include <gpu/mdev.h>
 
+#include <utils/types.h>
+
 #include <stdint.h>
+
+#include <nvml.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,32 +41,12 @@ struct NvResource {
     struct NvResource* child;   //!< Child of the resource.
 };
 
-/*! \brief Control Mechanism for the NVIDIA GPU.
- *
- * Mediated GPU controller for the Nvidia GPU structure.
+/*! \brief This is a structure for interacting with NVML for the utilization API.
  */
-struct NvMdevGpu {
-    int ctl_fd;                 //!< Control Nvidia control file description.
-    int dev_fd;                 //!< Device Nvidia file descriptor.
-    int mdev_fd;                //!< Mdev file descriptor.
-    struct Gpu* gpu;            //!< GPU structure corresponding to the GPU.
-    uint32_t root;              //!< Initial client.
-    uint32_t device;            //!< Device id for controlling the physical gpu.
-    uint32_t sub_device;        //!< Sub device id.
-    uint32_t mdev_config;       //!< Configurator for mdev devices.
-    struct NvResource* dev;     //!< Device.
-    struct NvResource* sdev;    //!< Subdevice.
-    struct NvResource* mdev;    //!< Mdev device.
-};
-
-/*! \brief Structure for managing the mediated stack.
- *
- * Structure for managing the entire mediated GPU structure for Nvidia.
- */
-struct NvMdev {
-    int fd;                     //!< Control file descriptor.
-    struct NvMdevGpu* gpus[32]; //!< Available GPUs.
-    struct NvResource* res;     //!< Resource tree.
+struct NvUtilization {
+    uint32_t num_gpus;          //!< Number of GPUs in the system.
+    nvmlDevice_t devices[32];   //!< Devices for the NVML.
+    nvmlPciInfo_t bus_ids[32];  //!< PCI Bus id for the GPU.
 };
 
 #ifdef __cplusplus

@@ -4,15 +4,15 @@
 
     [[config.request]]
     num = 23
-    v_dev_id = 0x1B301B30
-    p_dev_id = 0x1B30
+    v_dev_id = 0x233116DE
+    p_dev_id = 0x2330
     name = "GVM GPU"
     class = "Compute"
-    fb_len = 896
+    fb_len = 39000
     max_instances = 1
     ecc = False
     multi_mdev = False
-    fb_res = 128
+    fb_res = 1536
     map_video_size = 4
     enc_cap = 100
     bar1_len = 0x100
