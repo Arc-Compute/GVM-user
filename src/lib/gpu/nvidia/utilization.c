@@ -26,7 +26,6 @@ static void init(void *in)
 
     nvmlDeviceGetCount_v2(&(util->num_gpus));
 
-    // TODO: Make robust.
     for (uint32_t i = 0; i < util->num_gpus; ++i) {
         nvmlDeviceGetHandleByIndex_v2(i, &(util->devices[i]));
         nvmlDeviceGetPciInfo_v3(util->devices[i], &(util->bus_ids[i]));
@@ -65,7 +64,7 @@ static void stop(void *in __attribute__((unused)))
     nvmlShutdown();
 }
 
-struct UtilizationAPI nvidia_utilization_api = {
+const struct UtilizationAPI nvidia_utilization_api = {
 .init = init,
 .sample = sample,
 .stop = stop

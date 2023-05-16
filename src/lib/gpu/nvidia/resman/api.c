@@ -20,8 +20,6 @@
 #include <gpu/nvidia/resources.h>
 #include <gpu/nvidia/ioctl.h>
 
-#include <gpu/mdev.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,7 +92,7 @@ struct NvResource* rm_alloc_res(
             ret->fd = fd;
             ret->object = alloc_res.hObjectNew;
             ret->rm_class = rm_class;
-            ret->class_info = data;
+            ret->class_info = NULL;
 
             if (parent == NULL) {
                 ret->client = alloc_res.hObjectNew;
@@ -104,8 +102,10 @@ struct NvResource* rm_alloc_res(
                 ret->parent = parent->object;
 
                 struct NvResource* child = parent->child;
+
                 while (child != NULL && child->next != NULL)
                     child = child->next;
+
                 if (child != NULL)
                     child->next = ret;
                 else
@@ -148,11 +148,13 @@ void rm_free_tree(int fd, struct NvResource* root)
 
     if (root->rm_class == NV01_DEVICE_0 && root->class_info != NULL) {
         NV0000_CTRL_GPU_DETACH_IDS_PARAMS deattach_ids = {};
-        deattach_ids.gpuIds[0] = ((struct Gpu*) root->class_info)->identifier;
+        struct Gpu* ptr = (struct Gpu*) root->class_info;
+        deattach_ids.gpuIds[0] = ptr->identifier;
         deattach_ids.gpuIds[1] = NV0000_CTRL_GPU_INVALID_ID;
         close(root->fd);
         _RM_CTRL(fd, root->client, root->client, NV0000_CTRL_CMD_GPU_DETACH_IDS, deattach_ids);
-        free(root->class_info);
+        free(ptr->vendor_info);
+        ptr->vendor_info = NULL;
     }
 
     free(root);

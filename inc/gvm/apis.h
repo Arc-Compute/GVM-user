@@ -7,7 +7,10 @@
 #ifndef GVM_APIS_H
 #define GVM_APIS_H
 
+#include <gpu/init.h>
 #include <gpu/utilization.h>
+
+#include <gvm/creator.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,11 +24,14 @@ enum SupportedGpus {
     TotalGpus = 2                 //!< Number of supported GPUs inside the GVM system.
 };
 
-//! Utilization
-static struct UtilizationAPI *UTIL_APIS[TotalGpus] = {
-    &nvidia_utilization_api,
-    NULL
-};
+//! Initialization APIs
+extern const struct InitializationAPI *INIT_APIS[TotalGpus];
+
+//! Utilization APIs
+extern const struct UtilizationAPI *UTIL_APIS[TotalGpus];
+
+//! Creator APIs
+extern const struct CreatorAPI *CREATOR_APIS[TotalGpus];
 
 #ifdef __cplusplus
 };

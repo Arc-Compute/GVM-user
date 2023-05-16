@@ -3,20 +3,22 @@
     vendor_id = 0x10DE
 
     [[config.request]]
-    num = 23
-    v_dev_id = 0x233116DE
-    p_dev_id = 0x2330
+    num = 587
+    v_dev_id = 0x223514F9
+    p_dev_id = 0x2235
     name = "GVM GPU"
     class = "Compute"
-    fb_len = 39000
+    fb_len = 46016
     max_instances = 1
-    ecc = False
-    multi_mdev = False
-    fb_res = 1536
+    ecc_support = True
+    multi_mdev = True
+    fb_res = 3136
     map_video_size = 4
     enc_cap = 100
-    bar1_len = 0x100
+    bar1_len = 0x800
         [config.request.display]
         num_heads = 1
-        max_res_x = 3840
+        max_res_x = 4096
         max_res_y = 2160
+        frl_config = 60
+        frl_enable = 1

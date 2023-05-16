@@ -7,8 +7,6 @@
 #ifndef GPU_NVIDIA_RESOURCES_H
 #define GPU_NVIDIA_RESOURCES_H
 
-#include <gpu/mdev.h>
-
 #include <utils/types.h>
 
 #include <stdint.h>

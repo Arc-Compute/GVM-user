@@ -144,14 +144,19 @@ int main(int argc, char *argv[])
         }
     }
 
-    struct UtilizationAPI *api = UTIL_APIS[selected_gpu];
+    const struct UtilizationAPI *api = UTIL_APIS[selected_gpu];
     void *api_info = NULL;
     char filename[1024] = {};
     FILE *collector = NULL;
 
-    if (selected_gpu == Nvidia) {
+    switch (selected_gpu) {
+    case Nvidia:
         api_info = calloc(1, sizeof(struct NvUtilization));
-    }
+        break;
+    default:
+        printf("UNSUPPORTED GPU\n");
+        exit(1);
+    };
 
     api->init(api_info);
 

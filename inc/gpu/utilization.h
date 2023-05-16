@@ -35,7 +35,7 @@ struct AvgGPUUtils {
     struct AvgGPUUtil array[32];   //!< Maximum of 32 GPUs supported.
 };
 
-/*! \brief Utilization Control API
+/*! \brief Utilization Control API.
  *
  * This is a common API that all GPUs that need to be implemented in order
  * for us to support GPU Utilization.
@@ -47,7 +47,7 @@ struct UtilizationAPI {
 };
 
 //! NVIDIA Utilization API.
-extern struct UtilizationAPI nvidia_utilization_api;
+extern const struct UtilizationAPI nvidia_utilization_api;
 
 #ifdef __cplusplus
 };

@@ -48,7 +48,7 @@ struct GpuConfigs get_configs(const char* name)
 
         toml_array_t* gpu_array = toml_array_in(config, "gpu_config");
         ret.configs[i].gpu_size = toml_array_nelem(gpu_array);
-        int max_gpu_size = ret.configs[i].gpu_size * sizeof(struct Gpu);
+        size_t max_gpu_size = ret.configs[i].gpu_size * sizeof(struct Gpu);
         ret.configs[i].gpus = malloc(max_gpu_size);
         memset(ret.configs[i].gpus, 0xFF, max_gpu_size);
 
@@ -91,6 +91,18 @@ struct GpuConfigs get_configs(const char* name)
             info = toml_int_in(gpu, "identifier");
             if (info.ok)
                 ret.configs[i].gpus[j].identifier = info.u.i;
+
+            info = toml_int_in(gpu, "number");
+            if (info.ok)
+                ret.configs[i].gpus[j].number = info.u.i;
+
+            info = toml_int_in(gpu, "free_fb");
+            if (info.ok)
+                ret.configs[i].gpus[j].free_fb = info.u.i;
+
+            info = toml_int_in(gpu, "total_fb");
+            if (info.ok)
+                ret.configs[i].gpus[j].total_fb = info.u.i;
         }
 
         toml_array_t* req_array = toml_array_in(config, "request");
@@ -136,13 +148,13 @@ struct GpuConfigs get_configs(const char* name)
 
             info = toml_bool_in(mdev, "ecc_support");
             ret.configs[i].requests[j].ecc_support =
-                info.ok ? info.u.i != 0 : 0;
+                info.ok ? info.u.b : 0;
 
             info = toml_bool_in(mdev, "multi_mdev");
             ret.configs[i].requests[j].multi_mdev =
-                info.ok ? info.u.i != 0 : 0;
+                info.ok ? info.u.b : 0;
 
-            info = toml_int_in(mdev, "map_vid_size");
+            info = toml_int_in(mdev, "map_video_size");
             ret.configs[i].requests[j].map_vid_size =
                 info.ok ? info.u.i : 24;
 

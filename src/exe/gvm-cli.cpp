@@ -10,7 +10,12 @@
 
 #include <cargs.h>
 
+#include <gvm/apis.h>
 #include <gvm/legal.h>
+
+#include <gvm/nvidia/creator.h>
+
+#include <gvm/nvidia/open/signature.h>
 
 #include <utils/configs.h>
 
@@ -46,6 +51,13 @@ static struct cag_option options[] = {
 .description = "Shows the command help"
 },
 {
+.identifier = 's',
+.access_letters = "s",
+.access_name = "strict-api",
+.value_name = NULL,
+.description = "Uses a strict API which must be matched to run code"
+},
+{
 .identifier = 'a',
 .access_letters = "a",
 .access_name = "advanced-help",
@@ -60,12 +72,20 @@ int main(int argc, char *argv[])
     const char *config = NULL;
     cag_option_context context;
 
+    uint8_t strict_api = 0;
+
+    // NOTE: We are only supporting NVIDIA in this release.
+    enum SupportedGpus selected_gpu = Nvidia;
+
     cag_option_prepare(&context, options, CAG_ARRAY_SIZE(options), argc, argv);
     while (cag_option_fetch(&context)) {
         identifier = cag_option_get(&context);
         switch (identifier) {
             case 'c':
                 config = cag_option_get_value(&context);
+                break;
+            case 's':
+                strict_api = 1;
                 break;
             case 'a':
                 printf("HELP THE FALCONS ARE CHASING ME...\n");
@@ -83,4 +103,47 @@ int main(int argc, char *argv[])
         printf("Why must the Tensor Cores crush the little cpu man?\n");
         return 0;
     }
+
+    const struct CreatorAPI *api = CREATOR_APIS[selected_gpu];
+    void *api_info = NULL;
+
+    switch (selected_gpu) {
+    case Nvidia: {
+        struct NvCreator *a = NULL;
+        api_info = calloc(1, sizeof(struct NvCreator));
+        a = (struct NvCreator*) api_info;
+        a->ignore_version_check = !strict_api;
+        a->create_signature = nvidia_open_create_signature;
+        break;
+    }
+    default:
+        printf("UNSUPPORTED GPU\n");
+        exit(1);
+    };
+
+    struct GpuConfigs configs = get_configs(config);
+
+    if (api->init(api_info)) {
+        printf("Initializing the creator API failed.\n");
+        exit(1);
+    }
+
+    for (size_t i = 0; i < configs.config_size; ++i) {
+        struct GpuConfig config = configs.configs[i];
+
+        printf(
+            "Gpu size: %ld\nRequests size: %ld\n",
+            config.gpu_size, config.mdev_size
+        );
+
+        api->create_mdevs(
+            api_info,
+            config.requests, config.mdev_size,
+            config.gpus, config.gpu_size
+        );
+    }
+
+    api->register_mdevs(api_info);
+
+    api->stop(api_info);
 }

@@ -7,8 +7,6 @@
 #ifndef UTILS_CONFIGS_H
 #define UTILS_CONFIGS_H
 
-#include <gpu/mdev.h>
-
 #include <utils/types.h>
 
 #include <stdlib.h>
