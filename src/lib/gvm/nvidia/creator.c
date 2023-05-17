@@ -140,8 +140,6 @@ static uint8_t create_mdevs(
     struct NvInitData *dat = NULL;
     struct AttachedGpus *gpus = NULL;
 
-    printf("function: %s+0x%X\n", probe.function, probe.offset);
-
     if (crt == NULL || crt->dat == NULL || crt->dat->gpus == NULL ||
         requested == NULL || restricted == NULL)
         return 1;

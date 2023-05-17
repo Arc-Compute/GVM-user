@@ -8,7 +8,7 @@
 #define GVM_NVIDIA_MANAGER_H
 
 #include <gpu/nvidia/init.h>
-#include <gpu/nvidia/creator.h>
+#include <gvm/nvidia/creator.h>
 
 #include <ctrl/ctrla081.h>
 

@@ -34,7 +34,7 @@ struct ManagerAPI {
 };
 
 //! NVIDIA Manager API.
-extern const struct ManagerAPI nvidia_manager_api;
+//extern const struct ManagerAPI nvidia_manager_api;
 
 #ifdef __cplusplus
 };

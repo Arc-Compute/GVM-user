@@ -27,6 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if 0
+
 //! Initialization API.
 #define initializer INIT_APIS[Nvidia]
 
@@ -63,3 +65,5 @@ const struct ManagerAPI nvidia_manager_api = {
 .register_mdevs = register_mdevs,
 .stop = stop
 };
+
+#endif
