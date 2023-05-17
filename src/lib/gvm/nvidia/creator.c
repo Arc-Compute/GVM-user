@@ -26,11 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/evp.h>
-#include <openssl/pem.h>
-#include <openssl/sha.h>
-#include <openssl/rsa.h>
-
 //! Initialization API.
 #define api INIT_APIS[Nvidia]
 
@@ -144,12 +139,6 @@ static uint8_t create_mdevs(
     struct NvCreator *crt = (struct NvCreator*) in;
     struct NvInitData *dat = NULL;
     struct AttachedGpus *gpus = NULL;
-    struct envy_probe probe = {};
-
-    strcpy(probe.function, "_nv039288rm");
-    probe.offset = 0x39;
-    probe.registers[0] = REG_RAX;
-    probe.registers[1] = REG_INV;
 
     printf("function: %s+0x%X\n", probe.function, probe.offset);
 
@@ -159,10 +148,6 @@ static uint8_t create_mdevs(
 
     dat = crt->dat;
     gpus = crt->dat->gpus;
-
-    RM_CTRL(dat->ctl_fd, dat->root, ENVY_PROBE_UNREG, probe);
-    RM_CTRL(dat->ctl_fd, dat->root, ENVY_PROBE_REG, probe);
-    RM_CTRL(dat->ctl_fd, dat->root, ENVY_PROBE_DUMP_START, probe);
 
     for (uint32_t i = 0; i < gpus->num_gpus; ++i) {
         struct Gpu *gpu = (struct Gpu*) &(gpus->gpus[i]);
@@ -249,8 +234,6 @@ static uint8_t create_mdevs(
             );
         }
     }
-
-    RM_CTRL(dat->ctl_fd, dat->root, ENVY_PROBE_DUMP_STOP, probe);
 
     return 0;
 }

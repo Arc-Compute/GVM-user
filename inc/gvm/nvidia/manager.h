@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-2.0+
  *
  */
-#ifndef GVM_NVIDIA_CREATOR_H
-#define GVM_NVIDIA_CREATOR_H
+#ifndef GVM_NVIDIA_MANAGER_H
+#define GVM_NVIDIA_MANAGER_H
 
 #include <gpu/nvidia/init.h>
 #include <gpu/nvidia/creator.h>
@@ -16,10 +16,11 @@
 extern "C" {
 #endif
 
-/*! \brief Internal creator structure for NVIDIA.
+/*! \brief Internal Manager structure for NVIDIA.
  */
 struct NvManager {
     struct NvInitData *mgr;               //!< Data for the NVIDIA driver.
+    struct NvCreator *crt;                //!< Creator structure for the NVIDIA API.
     void (*create_signature)(
         NVA081_CTRL_VGPU_INFO*
     );                                    //!< Function to generate a signature.

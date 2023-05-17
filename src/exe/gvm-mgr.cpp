@@ -80,4 +80,6 @@ int main(int argc, char *argv[])
         printf("Little CPU man will not be crushed by the Tensors?\n");
         return 0;
     }
+
+    printf("Not Implemented in this release.\n");
 }
