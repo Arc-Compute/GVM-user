@@ -82,6 +82,37 @@ struct MDevRequest {
     uint32_t bar1_len;            //!< Bar 1 Length.
 };
 
+/*! These are the states of a vGPU which are supported.
+ */
+enum VgpuState {
+    vGPUInitializing,             //!< Initializing the vGPU.
+    vGPUAttached,                 //!< The vGPU is attached to the VM.
+    vGPULoading,                  //!< Loaded the vGPU inside the VM.
+    vGPUActive,                   //!< The vGPU is active.
+    vGPUUnloading                 //!< Unloading the vGPU inside the VM.
+};
+
+/*! \brief Structure representing a vGPU.
+ *
+ * This is a structure representing the generic vGPU.
+ */
+struct Vgpu {
+    struct UUID uuid;             //!< UUID for covering which vGPU is which.
+    uint64_t vram;                //!< vRAM size for the vGPU.
+    void *vendor_info;            //!< Vendor specific information for the vGPU.
+};
+
+/*! \brief Structure to maintain a VM.
+ *
+ * This is the structure where we have the necessary VM information for
+ * interacting with the kernel modules/qemu.
+ */
+struct VM {
+    struct UUID uuid;             //!< UUID associated with the VM.
+    uint32_t num_vgpus;           //!< Number of vGPUs associated with the system.
+    struct Vgpu* vgpus[32];       //!< Structure of the vGPUs associated with VM.
+};
+
 #ifdef __cplusplus
 };
 #endif

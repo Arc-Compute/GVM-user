@@ -72,12 +72,16 @@ struct NvResource* rm_alloc_res(
     struct NvResource* ret = NULL;
     NVOS21_PARAMETERS alloc_res = {};
 
-    if (fd == -1)
+    if (fd == -1) {
+        printf("Could not allocate, has no file descriptor.\n");
         return NULL;
+    }
 
     alloc_res.hObjectNew = object;
     alloc_res.hClass = rm_class;
     alloc_res.pAllocParms = data;
+
+    printf("Allocating: 0x%.8X (0x%.8X)\n", alloc_res.hObjectNew, alloc_res.hClass);
 
     if (parent != NULL) {
         alloc_res.hRoot = parent->client;
@@ -87,6 +91,8 @@ struct NvResource* rm_alloc_res(
     if (ioctl(fd, NV_ALLOC_RES, &alloc_res) != -1) {
         if (alloc_res.status == 0x00)
             ret = calloc(1, sizeof(struct NvResource));
+        else
+            printf("Got error allocating: 0x%X\n", alloc_res.status);
 
         if (ret != NULL) {
             ret->fd = fd;
@@ -115,6 +121,8 @@ struct NvResource* rm_alloc_res(
 
         return ret;
     }
+
+    perror("Could not allocate RM resource:");
 
     return NULL;
 }

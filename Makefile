@@ -39,11 +39,11 @@ LD := g++
 
 DEFS := -DRM_VERSION="\"$(RM_MAJOR).$(RM_MINOR).$(RM_PATCH)\""
 NVFLAGS := -I $(SDK)/nvidia/inc -I $(SDK)/nvalloc/common/inc -I $(SDK)/nvalloc/unix/include -I $(SDK)/nvml/ -DNVTYPES_USE_STDINT=1
-GENFLAGS := -c -g -Og -I inc -I extern/inc -Wall -Wextra $(DEFS)
+GENFLAGS := -c -g -Og -I inc -I extern/inc -Wall -Wextra -Wno-missing-field-initializers $(DEFS)
 
 ASMFLAGS := $(GENFLAGS)
-CFLAGS := $(GENFLAGS) $(NVFLAGS)
-CXXFLAGS := $(CFLAGS) $(NVFLAGS)
+CFLAGS := $(GENFLAGS) $(NVFLAGS) -std=gnu99
+CXXFLAGS := $(GENFLAGS) $(NVFLAGS)
 LDFLAGS := -rdynamic -ldl -lnvidia-ml
 
 all: lib

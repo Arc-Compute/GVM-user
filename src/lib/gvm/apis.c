@@ -20,3 +20,8 @@ const struct CreatorAPI *CREATOR_APIS[TotalGpus] = {
     &nvidia_creator_api,
     NULL
 };
+
+const struct ManagerAPI *MANAGER_APIS[TotalGpus] = {
+    &nvidia_manager_api,
+    NULL
+};

@@ -12,6 +12,7 @@
 #include <gvm/apis.h>
 #include <gvm/creator.h>
 #include <gvm/nvidia/creator.h>
+#include <gvm/nvidia/engines.h>
 #include <gvm/nvidia/debug/envy.h>
 
 #include <utils/gpus.h>
@@ -91,9 +92,11 @@ static uint8_t init(void *in)
     return 0;
 
 failed:
+    printf("Stopping creator.\n");
     api->stop(dat);
 
 failed_init:
+    printf("Freeing controller for creator.\n");
     free(dat);
 
     crt->dat = NULL;
@@ -107,7 +110,7 @@ static uint8_t stop(void *in)
 {
     struct NvCreator *crt = (struct NvCreator*) in;
 
-    if (crt == NULL)
+    if (crt == NULL || crt->dat == NULL)
         return 1;
 
     api->stop(crt->dat);

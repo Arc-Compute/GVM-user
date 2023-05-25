@@ -10,7 +10,12 @@
 
 #include <cargs.h>
 
+#include <gvm/apis.h>
 #include <gvm/legal.h>
+
+#include <gvm/nvidia/creator.h>
+#include <gvm/nvidia/manager.h>
+#include <gvm/nvidia/open/signature.h>
 
 #include <utils/configs.h>
 
@@ -36,11 +41,25 @@ static struct cag_option options[] = {
 .description = "Configuration file to use."
 },
 {
+.identifier = 'p',
+.access_letters = "p",
+.access_name = "plugin",
+.value_name = "PLUGIN",
+.description = "Plugin (VMIOP) to use."
+},
+{
 .identifier = 'h',
 .access_letters = "h",
 .access_name = "help",
 .value_name = NULL,
 .description = "Shows the command help"
+},
+{
+.identifier = 's',
+.access_letters = "s",
+.access_name = "strict-api",
+.value_name = NULL,
+.description = "Uses a strict API which must be matched to run code"
 },
 {
 .identifier = 'a',
@@ -53,9 +72,17 @@ static struct cag_option options[] = {
 
 int main(int argc, char *argv[])
 {
+    int ret = 0;
     char identifier;
     const char *config = NULL;
+    const char *plugin = NULL;
     cag_option_context context;
+
+    uint8_t strict_api = 0;
+    uint32_t errors = 0;
+
+    // NOTE: We are only supporting NVIDIA in this release.
+    enum SupportedGpus selected_gpu = Nvidia;
 
     cag_option_prepare(&context, options, CAG_ARRAY_SIZE(options), argc, argv);
     while (cag_option_fetch(&context)) {
@@ -63,6 +90,12 @@ int main(int argc, char *argv[])
         switch (identifier) {
             case 'c':
                 config = cag_option_get_value(&context);
+                break;
+            case 'p':
+                plugin = cag_option_get_value(&context);
+                break;
+            case 's':
+                strict_api = 1;
                 break;
             case 'a':
                 printf("THE FALCONS WILL NEVER TAKE ME ALIVE\n");
@@ -76,10 +109,64 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (config == NULL) {
-        printf("Little CPU man will not be crushed by the Tensors?\n");
-        return 0;
+    const struct ManagerAPI *api = MANAGER_APIS[selected_gpu];
+    void *api_info = NULL;
+
+    switch (selected_gpu) {
+    case Nvidia: {
+        struct NvManager *a = NULL;
+        api_info = calloc(1, sizeof(struct NvManager));
+        a = (struct NvManager*) api_info;
+        a->ignore_version_check = !strict_api;
+        a->create_signature = nvidia_open_create_signature;
+        a->use_vmiop = 1;
+        a->vmiop_plugin =
+            plugin == NULL ?
+            "/usr/lib/x86_64-linux-gnu/libnvidia-vgpu.so" : plugin;
+        break;
+    }
+    default:
+        printf("UNSUPPORTED GPU\n");
+        exit(1);
+    };
+
+    if (api->init(api_info)) {
+        printf("Initializing the manager API failed.\n");
+        ret = 1;
+        goto finished;
     }
 
-    printf("Not Implemented in this release.\n");
+    if (config != NULL) {
+        struct GpuConfigs configs = get_configs(config);
+
+        for (size_t i = 0; i < configs.config_size; ++i) {
+            struct GpuConfig config = configs.configs[i];
+
+            printf(
+                "Gpu size: %ld\nRequests size: %ld\n",
+                config.gpu_size, config.mdev_size
+            );
+
+            api->create_mdevs(
+                api_info,
+                config.requests, config.mdev_size,
+                config.gpus, config.gpu_size
+            );
+        }
+
+        api->register_mdevs(api_info);
+    }
+
+    while (api->running(api_info)) {
+        errors += api->handle_event(api_info);
+
+        if (errors > 10)
+            break;
+    }
+
+    api->stop(api_info);
+
+finished:
+    free(api_info);
+    return ret;
 }

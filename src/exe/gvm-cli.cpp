@@ -68,6 +68,7 @@ static struct cag_option options[] = {
 
 int main(int argc, char *argv[])
 {
+    int ret = 0;
     char identifier;
     const char *config = NULL;
     cag_option_context context;
@@ -125,7 +126,8 @@ int main(int argc, char *argv[])
 
     if (api->init(api_info)) {
         printf("Initializing the creator API failed.\n");
-        exit(1);
+        ret = 1;
+        goto finished;
     }
 
     for (size_t i = 0; i < configs.config_size; ++i) {
@@ -146,4 +148,8 @@ int main(int argc, char *argv[])
     api->register_mdevs(api_info);
 
     api->stop(api_info);
+
+finished:
+    free(api_info);
+    return ret;
 }

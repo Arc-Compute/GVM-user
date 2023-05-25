@@ -11,6 +11,7 @@
 #include <gpu/utilization.h>
 
 #include <gvm/creator.h>
+#include <gvm/manager.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +33,9 @@ extern const struct UtilizationAPI *UTIL_APIS[TotalGpus];
 
 //! Creator APIs
 extern const struct CreatorAPI *CREATOR_APIS[TotalGpus];
+
+//! Manager APIs
+extern const struct ManagerAPI *MANAGER_APIS[TotalGpus];
 
 #ifdef __cplusplus
 };

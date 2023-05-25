@@ -15,9 +15,6 @@
 extern "C" {
 #endif
 
-//! Index for the vGPU configurator.
-#define VGPU_CONFIG_INDEX 0
-
 //! License for the vGPUs created by us for the NVIDIA subsystem.
 #define VGPU_LICENSE_COMPUTE "NVIDIA-vComputeServer,9.0;Quadro-Virtual-DWS,5.0"
 

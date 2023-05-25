@@ -105,6 +105,12 @@ static struct AttachedGpus *get_gpus(void *in)
     root = dat->root;
     ctl_fd = dat->ctl_fd;
 
+    if (dat->gpus != NULL) {
+        free(ret);
+        ret = dat->gpus;
+        return ret;
+    }
+
     if (root == NULL)
         goto failed;
 
@@ -137,8 +143,10 @@ static struct AttachedGpus *get_gpus(void *in)
             root->object, probed_ids.gpuIds[i], 2
         );
 
-        if (ngpu == NULL)
+        if (ngpu == NULL) {
+            printf("Could not allocate NVIDIA vendor information for the GPU.\n");
             goto failed_gpus;
+        }
 
         gpu->vendor_info = ngpu;
 
@@ -162,7 +170,7 @@ static struct AttachedGpus *get_gpus(void *in)
         ngpu->dev = rm_alloc_res(ctl_fd, root, device, NV01_DEVICE_0, &dev_alloc);
 
         if (ngpu->dev == NULL) {
-            free(ngpu);
+            printf("Could not allocate device: 0x%.8X\n", device);
             goto failed_gpus;
         }
 
@@ -173,6 +181,7 @@ static struct AttachedGpus *get_gpus(void *in)
         );
 
         if (ngpu->sub_dev == NULL) {
+            printf("Could not allocate subdevice: 0x%.8X\n", device);
             goto failed_gpus;
         }
 
@@ -188,8 +197,10 @@ static struct AttachedGpus *get_gpus(void *in)
         gpu->sub_vendor_id = 0x10DE;
         gpu->sub_device_id = bus_info.pciSubSystemId >> 16;
 
-        if (get_used_fb(in, gpu))
+        if (get_used_fb(in, gpu)) {
+            printf("Could not get framebuffer for gpu%d.\n", gpu->number);
             goto failed_gpus;
+        }
 
         printf(
             "Attached GPU %.8X (%.4X, %.4X, %.4X, %.4X)\n"

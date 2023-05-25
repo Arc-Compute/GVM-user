@@ -23,18 +23,19 @@ extern "C" {
  */
 struct ManagerAPI {
     uint8_t (*init)(void*);             //!< Initialization for the manager.
-    uint8_t (*get_request)(void*);      //!< Gets a request to start a VM.
-    uint8_t (*start_vm)(
-        void*, struct UUID*
-    );                                  //!< Starts the VM.
-    uint8_t (*stop_vm)(
-        void*, struct UUID*
-    );                                  //!< Starts the VM.
+    uint8_t (*create_mdevs)(
+        void*,
+        struct MDevRequest*, size_t,
+        struct Gpu*, size_t
+    );                                  //!< Creates a list of MDEVs on the system.
+    uint8_t (*register_mdevs)(void*);   //!< Registers the MDEVs on the system.
+    uint8_t (*handle_event)(void*);     //!< Handles a vGPU request.
     uint8_t (*stop)(void*);             //!< Stops the manager from running.
+    uint8_t (*running)(void*);          //!< Determines if we are running the program.
 };
 
 //! NVIDIA Manager API.
-//extern const struct ManagerAPI nvidia_manager_api;
+extern const struct ManagerAPI nvidia_manager_api;
 
 #ifdef __cplusplus
 };
